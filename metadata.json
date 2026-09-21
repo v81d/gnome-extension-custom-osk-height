@@ -2,7 +2,7 @@
   "name": "Custom OSK Height",
   "description": "Change the height of the GNOME on-screen keyboard.",
   "uuid": "custom-osk-height@v81d",
-  "shell-version": [
-    "50"
-  ]
+  "shell-version": ["50"],
+  "gettext-domain": "custom-osk-height@v81d",
+  "settings-schema": "org.gnome.shell.extensions.custom-osk-height"
 }
