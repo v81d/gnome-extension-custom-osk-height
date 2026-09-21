@@ -15,12 +15,36 @@
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
-import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
+import * as Main from "resource:///org/gnome/shell/ui/main.js";
+import * as KeyboardBase from "resource:///org/gnome/shell/ui/keyboard.js";
+import {
+  Extension,
+  InjectionManager,
+} from "resource:///org/gnome/shell/extensions/extension.js";
 
-export default class PlainExampleExtension extends Extension {
-    enable() {
-    }
+// testing first
+const HEIGHT_MULTIPLIER = 1.25;
 
-    disable() {
-    }
+export default class CustomOskHeightExtension extends Extension {
+  enable() {
+    this._injectionManager = new InjectionManager();
+
+    // override
+    this._injectionManager.overrideMethod(
+      KeyboardBase.Keyboard.prototype,
+      "_relayout",
+      (originalMethod) =>
+        function (...args) {
+          originalMethod.call(this, ...args);
+          this.height = Math.round(this.height * HEIGHT_MULTIPLIER); // TODO: get the multiplier from prefs
+        },
+    );
+
+    Main.keyboard._keyboard?.queue_relayout();
+  }
+
+  disable() {
+    this._injectionManager?.clear();
+    this._injectionManager = null;
+  }
 }
