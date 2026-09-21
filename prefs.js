@@ -33,9 +33,9 @@ export default class CustomOskHeightPreferences extends ExtensionPreferences {
     const mainGroup = new Adw.PreferencesGroup();
     mainPage.add(mainGroup);
 
-    const landscapeOskHeightMultiplierRow = new Adw.SpinRow({
-      title: _("Landscape Mode OSK Height Multiplier"),
-      subtitle: _("OSK height multiplier when in landscape mode."),
+    const landscapeOskHeightModifierRow = new Adw.SpinRow({
+      title: _("Landscape Mode OSK Height Modifier"),
+      subtitle: _("OSK height modifier when in landscape mode."),
       adjustment: new Gtk.Adjustment({
         lower: 0.1,
         upper: 3.0,
@@ -44,11 +44,11 @@ export default class CustomOskHeightPreferences extends ExtensionPreferences {
       }),
       digits: 2,
     });
-    mainGroup.add(landscapeOskHeightMultiplierRow);
+    mainGroup.add(landscapeOskHeightModifierRow);
 
-    const portraitOskHeightMultiplierRow = new Adw.SpinRow({
-      title: _("Portrait Mode OSK Height Multiplier"),
-      subtitle: _("OSK height multiplier when in portrait mode."),
+    const portraitOskHeightModifierRow = new Adw.SpinRow({
+      title: _("Portrait Mode OSK Height Modifier"),
+      subtitle: _("OSK height modifier when in portrait mode."),
       adjustment: new Gtk.Adjustment({
         lower: 0.1,
         upper: 4.0,
@@ -57,17 +57,17 @@ export default class CustomOskHeightPreferences extends ExtensionPreferences {
       }),
       digits: 2,
     });
-    mainGroup.add(portraitOskHeightMultiplierRow);
+    mainGroup.add(portraitOskHeightModifierRow);
 
     settings.bind(
-      "landscape-osk-height-multiplier",
-      landscapeOskHeightMultiplierRow,
+      "landscape-osk-height-modifier",
+      landscapeOskHeightModifierRow,
       "value",
       Gio.SettingsBindFlags.DEFAULT,
     );
     settings.bind(
-      "portrait-osk-height-multiplier",
-      portraitOskHeightMultiplierRow,
+      "portrait-osk-height-modifier",
+      portraitOskHeightModifierRow,
       "value",
       Gio.SettingsBindFlags.DEFAULT,
     );
