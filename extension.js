@@ -22,28 +22,53 @@ import {
   InjectionManager,
 } from "resource:///org/gnome/shell/extensions/extension.js";
 
-// testing first
-const HEIGHT_MULTIPLIER = 1.25;
-
 export default class CustomOskHeightExtension extends Extension {
   enable() {
+    this._settings = this.getSettings();
     this._injectionManager = new InjectionManager();
 
-    // override
+    // override relayout method
     this._injectionManager.overrideMethod(
       KeyboardBase.Keyboard.prototype,
       "_relayout",
-      (originalMethod) =>
-        function (...args) {
+      (originalMethod) => {
+        const settings = this._settings;
+
+        return function (...args) {
           originalMethod.call(this, ...args);
-          this.height = Math.round(this.height * HEIGHT_MULTIPLIER); // TODO: get the multiplier from prefs
-        },
+
+          // get screen orientation
+          const monitor = Main.layoutManager.primaryMonitor;
+          const isPortrait = monitor.height > monitor.width;
+          const oskHeightMultiplier = isPortrait
+            ? settings.get_double("portrait-osk-height-multiplier")
+            : settings.get_double("landscape-osk-height-multiplier");
+
+          // modify OSK height
+          this.height = Math.round(this.height * oskHeightMultiplier);
+        };
+      },
     );
 
-    Main.keyboard._keyboard?.queue_relayout();
+    const forceRelayout = () => Main.keyboard._keyboard?.queue_relayout();
+
+    this._landscapeChangedId = this._settings.connect(
+      "changed::landscape-osk-height-multiplier",
+      forceRelayout,
+    );
+    this._portraitChangedId = this._settings.connect(
+      "changed::portrait-osk-height-multiplier",
+      forceRelayout,
+    );
+
+    forceRelayout();
   }
 
   disable() {
+    this._settings?.disconnect(this._landscapeChangedId);
+    this._settings?.disconnect(this._portraitChangedId);
+    this._landscapeChangedId = null;
+    this._portraitChangedId = null;
     this._injectionManager?.clear();
     this._injectionManager = null;
   }
