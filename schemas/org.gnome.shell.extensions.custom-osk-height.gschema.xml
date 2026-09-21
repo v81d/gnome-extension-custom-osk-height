@@ -2,10 +2,10 @@
 <schemalist>
   <schema id="org.gnome.shell.extensions.custom-osk-height"
     path="/org/gnome/shell/extensions/custom-osk-height/">
-    <key name="landscape-osk-height-multiplier" type="d">
+    <key name="landscape-osk-height-modifier" type="d">
       <default>1.0</default>
     </key>
-    <key name="portrait-osk-height-multiplier" type="d">
+    <key name="portrait-osk-height-modifier" type="d">
       <default>1.0</default>
     </key>
   </schema>

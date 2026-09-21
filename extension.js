@@ -40,12 +40,12 @@ export default class CustomOskHeightExtension extends Extension {
           // get screen orientation
           const monitor = Main.layoutManager.primaryMonitor;
           const isPortrait = monitor.height > monitor.width;
-          const oskHeightMultiplier = isPortrait
-            ? settings.get_double("portrait-osk-height-multiplier")
-            : settings.get_double("landscape-osk-height-multiplier");
+          const oskHeightModifier = isPortrait
+            ? settings.get_double("portrait-osk-height-modifier")
+            : settings.get_double("landscape-osk-height-modifier");
 
           // modify OSK height
-          this.height = Math.round(this.height * oskHeightMultiplier);
+          this.height = Math.round(this.height * oskHeightModifier); // TODO: allow both px-based and multiplier-based values
         };
       },
     );
@@ -53,11 +53,11 @@ export default class CustomOskHeightExtension extends Extension {
     const forceRelayout = () => Main.keyboard._keyboard?.queue_relayout();
 
     this._landscapeChangedId = this._settings.connect(
-      "changed::landscape-osk-height-multiplier",
+      "changed::landscape-osk-height-modifier",
       forceRelayout,
     );
     this._portraitChangedId = this._settings.connect(
-      "changed::portrait-osk-height-multiplier",
+      "changed::portrait-osk-height-modifier",
       forceRelayout,
     );
 
