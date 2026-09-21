@@ -33,15 +33,36 @@ export default class CustomOskHeightPreferences extends ExtensionPreferences {
     const mainGroup = new Adw.PreferencesGroup();
     mainPage.add(mainGroup);
 
+    const landscapeOskHeightModifierAdjustment = new Gtk.Adjustment({
+      lower: 0.1,
+      upper: 4096.0,
+      step_increment: 0.1,
+      page_increment: 1.0,
+      value: 1.0,
+    });
+
+    const portraitOskHeightModifierAdjustment = new Gtk.Adjustment({
+      lower: 0.1,
+      upper: 4096.0,
+      step_increment: 0.1,
+      page_increment: 1.0,
+      value: 1.0,
+    });
+
+    const oskHeightModifierModeRow = new Adw.ComboRow({
+      title: _("OSK Height Modifier Mode"),
+      subtitle: _("How the OSK height modifier is interpreted."),
+      model: Gtk.StringList.new([_("Multiplier"), _("Pixel value")]),
+    });
+    mainGroup.add(oskHeightModifierModeRow);
+
+    oskHeightModifierModeRow.selected =
+      settings.get_string("osk-height-modifier-mode") === "multiplier" ? 0 : 1;
+
     const landscapeOskHeightModifierRow = new Adw.SpinRow({
       title: _("Landscape Mode OSK Height Modifier"),
       subtitle: _("OSK height modifier when in landscape mode."),
-      adjustment: new Gtk.Adjustment({
-        lower: 0.1,
-        upper: 3.0,
-        step_increment: 0.1,
-        page_increment: 1.0,
-      }),
+      adjustment: landscapeOskHeightModifierAdjustment,
       digits: 2,
     });
     mainGroup.add(landscapeOskHeightModifierRow);
@@ -49,15 +70,17 @@ export default class CustomOskHeightPreferences extends ExtensionPreferences {
     const portraitOskHeightModifierRow = new Adw.SpinRow({
       title: _("Portrait Mode OSK Height Modifier"),
       subtitle: _("OSK height modifier when in portrait mode."),
-      adjustment: new Gtk.Adjustment({
-        lower: 0.1,
-        upper: 4.0,
-        step_increment: 0.1,
-        page_increment: 1.0,
-      }),
+      adjustment: portraitOskHeightModifierAdjustment,
       digits: 2,
     });
     mainGroup.add(portraitOskHeightModifierRow);
+
+    oskHeightModifierModeRow.connect("notify::selected", () => {
+      settings.set_string(
+        "osk-height-modifier-mode",
+        oskHeightModifierModeRow.selected === 0 ? "multiplier" : "pixel-value",
+      );
+    });
 
     settings.bind(
       "landscape-osk-height-modifier",

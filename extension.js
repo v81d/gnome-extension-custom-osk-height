@@ -40,12 +40,20 @@ export default class CustomOskHeightExtension extends Extension {
           // get screen orientation
           const monitor = Main.layoutManager.primaryMonitor;
           const isPortrait = monitor.height > monitor.width;
+
+          const oskHeightModifierMode = settings.get_string(
+            "osk-height-modifier-mode",
+          );
           const oskHeightModifier = isPortrait
             ? settings.get_double("portrait-osk-height-modifier")
             : settings.get_double("landscape-osk-height-modifier");
 
           // modify OSK height
-          this.height = Math.round(this.height * oskHeightModifier); // TODO: allow both px-based and multiplier-based values
+          this.height = Math.round(
+            oskHeightModifierMode === "pixel-value"
+              ? oskHeightModifier
+              : this.height * oskHeightModifier,
+          );
         };
       },
     );
