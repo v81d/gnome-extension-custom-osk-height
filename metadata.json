@@ -1,0 +1,8 @@
+{
+  "name": "Custom OSK Height",
+  "description": "Change the height of the GNOME on-screen keyboard.",
+  "uuid": "custom-osk-height@v81d",
+  "shell-version": [
+    "50"
+  ]
+}
