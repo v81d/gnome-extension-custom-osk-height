@@ -1,0 +1,118 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR v81d
+# This file is distributed under the same license as the Custom OSK Height package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Custom OSK Height\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-07 13:14-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: prefs.js:34
+msgid "Interpretation Mode"
+msgstr ""
+
+#: prefs.js:35
+msgid "Configure how the height value is interpreted."
+msgstr ""
+
+#: prefs.js:40
+msgid "Multiplier Settings"
+msgstr ""
+
+#: prefs.js:41
+msgid "Adjust the OSK height multiplier values."
+msgstr ""
+
+#: prefs.js:46
+msgid "Pixel Height Settings"
+msgstr ""
+
+#: prefs.js:47
+msgid "Adjust the OSK pixel height values."
+msgstr ""
+
+#: prefs.js:52
+msgid "Suggestions Height Options"
+msgstr ""
+
+#: prefs.js:53
+msgid "Control the OSK suggestions height."
+msgstr ""
+
+#: prefs.js:109
+msgid "OSK Height Modifier Mode"
+msgstr ""
+
+#: prefs.js:110
+msgid "How the OSK height modifier is interpreted."
+msgstr ""
+
+#: prefs.js:111
+msgid "Multiplier"
+msgstr ""
+
+#: prefs.js:111
+msgid "Pixels"
+msgstr ""
+
+#: prefs.js:120
+msgid "Landscape OSK Height Multiplier"
+msgstr ""
+
+#: prefs.js:121
+msgid "The OSK height multiplier when in landscape mode."
+msgstr ""
+
+#: prefs.js:129
+msgid "Portrait OSK Height Multiplier"
+msgstr ""
+
+#: prefs.js:130
+msgid "OSK height multiplier when in portrait mode."
+msgstr ""
+
+#: prefs.js:138
+msgid "Landscape OSK Pixel Height"
+msgstr ""
+
+#: prefs.js:139
+msgid "The OSK pixel height when in landscape mode."
+msgstr ""
+
+#: prefs.js:146
+msgid "Portrait OSK Pixel Height"
+msgstr ""
+
+#: prefs.js:147
+msgid "The OSK pixel height when in portrait mode."
+msgstr ""
+
+#: prefs.js:154
+msgid "Enable Custom OSK Suggestions Height"
+msgstr ""
+
+#: prefs.js:155
+msgid "Allow customizing the OSK suggestion row height."
+msgstr ""
+
+#: prefs.js:161
+msgid "OSK Suggestions Pixel Height"
+msgstr ""
+
+#: prefs.js:162
+msgid "The pixel height of the OSK suggestion row."
+msgstr ""
+
+#: prefs.js:255
+msgid "Reset to Default"
+msgstr ""
