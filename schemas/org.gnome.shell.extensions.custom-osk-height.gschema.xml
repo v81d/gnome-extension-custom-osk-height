@@ -2,7 +2,7 @@
 <schemalist>
   <enum id="org.gnome.shell.extensions.custom-osk-height.ModifierMode">
     <value nick="multiplier" value="0" />
-    <value nick="pixel-value" value="1" />
+    <value nick="pixels" value="1" />
   </enum>
   <schema id="org.gnome.shell.extensions.custom-osk-height"
     path="/org/gnome/shell/extensions/custom-osk-height/">
@@ -10,11 +10,17 @@
       enum="org.gnome.shell.extensions.custom-osk-height.ModifierMode">
       <default>'multiplier'</default>
     </key>
-    <key name="landscape-osk-height-modifier" type="d">
+    <key name="landscape-osk-height-multiplier" type="d">
       <default>1.0</default>
     </key>
-    <key name="portrait-osk-height-modifier" type="d">
+    <key name="portrait-osk-height-multiplier" type="d">
       <default>1.0</default>
+    </key>
+    <key name="landscape-osk-height-pixels" type="u">
+      <default>432</default>
+    </key>
+    <key name="portrait-osk-height-pixels" type="u">
+      <default>480</default>
     </key>
   </schema>
 </schemalist>

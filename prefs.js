@@ -30,69 +30,188 @@ export default class CustomOskHeightPreferences extends ExtensionPreferences {
     const mainPage = new Adw.PreferencesPage();
     window.add(mainPage);
 
-    const mainGroup = new Adw.PreferencesGroup();
-    mainPage.add(mainGroup);
+    const interpretationSettingsGroup = new Adw.PreferencesGroup({
+      title: _("Interpretation Mode"),
+      description: _("Configure how the height value is interpreted."),
+    });
+    mainPage.add(interpretationSettingsGroup);
 
-    const landscapeOskHeightModifierAdjustment = new Gtk.Adjustment({
+    const multiplierSettingsGroup = new Adw.PreferencesGroup({
+      title: _("Multiplier Settings"),
+      description: _("Adjust the OSK height multiplier values."),
+    });
+    mainPage.add(multiplierSettingsGroup);
+
+    const pixelHeightSettingsGroup = new Adw.PreferencesGroup({
+      title: _("Pixel Height Settings"),
+      description: _("Adjust the OSK pixel height values."),
+    });
+    mainPage.add(pixelHeightSettingsGroup);
+
+    /** The landscape OSK height multiplier adjustment. */
+    const landscapeMultiplierAdjustment = new Gtk.Adjustment({
       lower: 0.1,
-      upper: 4096.0,
+      upper: 4.0,
       step_increment: 0.1,
       page_increment: 1.0,
       value: 1.0,
     });
 
-    const portraitOskHeightModifierAdjustment = new Gtk.Adjustment({
+    /** The portrait OSK height multiplier adjustment. */
+    const portraitMultiplierAdjustment = new Gtk.Adjustment({
       lower: 0.1,
-      upper: 4096.0,
+      upper: 4.0,
       step_increment: 0.1,
       page_increment: 1.0,
       value: 1.0,
     });
 
-    const oskHeightModifierModeRow = new Adw.ComboRow({
+    /** The landscape OSK pixel height adjustment. */
+    const landscapePixelsAdjustment = new Gtk.Adjustment({
+      lower: 128,
+      upper: 4096,
+      step_increment: 1,
+      page_increment: 8,
+      value: 432,
+    });
+
+    /** The portrait OSK pixel height adjustment. */
+    const portraitPixelsAdjustment = new Gtk.Adjustment({
+      lower: 128,
+      upper: 4096,
+      step_increment: 1,
+      page_increment: 8,
+      value: 480,
+    });
+
+    /**
+     * The OSK height interpretation mode row.
+     *
+     * Changing the selection changes which modifier rows to display.
+     * For example, if the value is changed from Multiplier to Pixels, the multiplier rows will be hidden and the pixel height rows will be shown.
+     */
+    const modifierModeRow = new Adw.ComboRow({
       title: _("OSK Height Modifier Mode"),
       subtitle: _("How the OSK height modifier is interpreted."),
-      model: Gtk.StringList.new([_("Multiplier"), _("Pixel value")]),
+      model: Gtk.StringList.new([_("Multiplier"), _("Pixels")]),
     });
-    mainGroup.add(oskHeightModifierModeRow);
+    interpretationSettingsGroup.add(modifierModeRow);
 
-    oskHeightModifierModeRow.selected =
+    modifierModeRow.selected =
       settings.get_string("osk-height-modifier-mode") === "multiplier" ? 0 : 1;
 
-    const landscapeOskHeightModifierRow = new Adw.SpinRow({
-      title: _("Landscape Mode OSK Height Modifier"),
-      subtitle: _("OSK height modifier when in landscape mode."),
-      adjustment: landscapeOskHeightModifierAdjustment,
+    /** The landscape mode OSK height multiplier value. */
+    const landscapeMultiplierRow = new Adw.SpinRow({
+      title: _("Landscape OSK Height Multiplier"),
+      subtitle: _("The OSK height multiplier when in landscape mode."),
+      adjustment: landscapeMultiplierAdjustment,
       digits: 2,
     });
-    mainGroup.add(landscapeOskHeightModifierRow);
+    multiplierSettingsGroup.add(landscapeMultiplierRow);
 
-    const portraitOskHeightModifierRow = new Adw.SpinRow({
-      title: _("Portrait Mode OSK Height Modifier"),
-      subtitle: _("OSK height modifier when in portrait mode."),
-      adjustment: portraitOskHeightModifierAdjustment,
+    /** The portrait mode OSK height multiplier value. */
+    const portraitMultiplierRow = new Adw.SpinRow({
+      title: _("Portrait OSK Height Multiplier"),
+      subtitle: _("OSK height multiplier when in portrait mode."),
+      adjustment: portraitMultiplierAdjustment,
       digits: 2,
     });
-    mainGroup.add(portraitOskHeightModifierRow);
+    multiplierSettingsGroup.add(portraitMultiplierRow);
 
-    oskHeightModifierModeRow.connect("notify::selected", () => {
+    /** The landscape mode OSK pixel height value. */
+    const landscapePixelsRow = new Adw.SpinRow({
+      title: _("Landscape OSK Pixel Height"),
+      subtitle: _("The OSK pixel height when in landscape mode."),
+      adjustment: landscapePixelsAdjustment,
+    });
+    pixelHeightSettingsGroup.add(landscapePixelsRow);
+
+    /** The portrait mode OSK pixel height value. */
+    const portraitPixelsRow = new Adw.SpinRow({
+      title: _("Portrait OSK Pixel Height"),
+      subtitle: _("The OSK pixel height when in portrait mode."),
+      adjustment: portraitPixelsAdjustment,
+    });
+    pixelHeightSettingsGroup.add(portraitPixelsRow);
+
+    // callback when a new modifier mode is selected
+    modifierModeRow.connect("notify::selected", () => {
       settings.set_string(
         "osk-height-modifier-mode",
-        oskHeightModifierModeRow.selected === 0 ? "multiplier" : "pixel-value",
+        modifierModeRow.selected === 0 ? "multiplier" : "pixels",
       );
+
+      updateModifierSensitivity();
     });
 
+    // on UI initialization
+    updateModifierSensitivity();
+
+    // add reset button to each row
+    addResetButton(landscapeMultiplierRow, "landscape-osk-height-multiplier");
+    addResetButton(portraitMultiplierRow, "portrait-osk-height-multiplier");
+    addResetButton(landscapePixelsRow, "landscape-osk-height-pixels");
+    addResetButton(portraitPixelsRow, "portrait-osk-height-pixels");
+    addResetButton(modifierModeRow, "osk-height-modifier-mode", () => {
+      modifierModeRow.selected =
+        settings.get_string("osk-height-modifier-mode") === "multiplier"
+          ? 0
+          : 1;
+      updateModifierSensitivity();
+    });
+
+    // bind all multiplier rows to their respective gsettings keys
     settings.bind(
-      "landscape-osk-height-modifier",
-      landscapeOskHeightModifierRow,
+      "landscape-osk-height-multiplier",
+      landscapeMultiplierRow,
       "value",
       Gio.SettingsBindFlags.DEFAULT,
     );
     settings.bind(
-      "portrait-osk-height-modifier",
-      portraitOskHeightModifierRow,
+      "portrait-osk-height-multiplier",
+      portraitMultiplierRow,
       "value",
       Gio.SettingsBindFlags.DEFAULT,
     );
+
+    // bind all pixel height rows to their respective gsettings keys
+    settings.bind(
+      "landscape-osk-height-pixels",
+      landscapePixelsRow,
+      "value",
+      Gio.SettingsBindFlags.DEFAULT,
+    );
+    settings.bind(
+      "portrait-osk-height-pixels",
+      portraitPixelsRow,
+      "value",
+      Gio.SettingsBindFlags.DEFAULT,
+    );
+
+    /** Disable the multiplier group when pixel mode is enabled and vice versa. */
+    function updateModifierSensitivity() {
+      const isMultiplier = modifierModeRow.selected === 0;
+
+      // disable the previous settings rows
+      multiplierSettingsGroup.set_sensitive(isMultiplier);
+      pixelHeightSettingsGroup.set_sensitive(!isMultiplier);
+    }
+
+    /** Add a reset to default button at the end of a row. */
+    function addResetButton(row, key, afterReset = () => {}) {
+      const button = new Gtk.Button({
+        icon_name: "edit-undo-symbolic",
+        tooltip_text: _("Reset to Default"),
+        valign: Gtk.Align.CENTER,
+      });
+
+      button.add_css_class("flat");
+      button.connect("clicked", () => {
+        settings.reset(key);
+        afterReset();
+      });
+
+      row.add_suffix(button);
+    }
   }
 }
