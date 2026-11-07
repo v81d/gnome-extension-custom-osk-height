@@ -22,5 +22,11 @@
     <key name="portrait-osk-height-pixels" type="u">
       <default>480</default>
     </key>
+    <key name="custom-osk-suggestions-height-enabled" type="b">
+      <default>false</default>
+    </key>
+    <key name="osk-suggestions-height-pixels" type="u">
+      <default>60</default>
+    </key>
   </schema>
 </schemalist>

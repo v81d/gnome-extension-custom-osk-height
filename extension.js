@@ -45,11 +45,9 @@ export default class CustomOskHeightExtension extends Extension {
           const isPortrait = monitor.height > monitor.width;
 
           // whether to scale the OSK by a multiplier or set to a fixed pixel height
-          const oskHeightModifierMode = settings.get_string(
-            "osk-height-modifier-mode",
-          );
+          const modifierMode = settings.get_string("osk-height-modifier-mode");
 
-          if (oskHeightModifierMode === "multiplier") {
+          if (modifierMode === "multiplier") {
             const multiplier = isPortrait
               ? settings.get_double("portrait-osk-height-multiplier")
               : settings.get_double("landscape-osk-height-multiplier");
@@ -64,6 +62,16 @@ export default class CustomOskHeightExtension extends Extension {
             // change current OSK height to new pixel value
             this.height = pixelHeight;
           }
+
+          const suggestionsHeightEnabled = settings.get_boolean(
+            "custom-osk-suggestions-height-enabled",
+          );
+
+          if (suggestionsHeightEnabled)
+            this._suggestions.height = settings.get_uint(
+              "osk-suggestions-height-pixels",
+            );
+          else this._suggestions.height = -1;
         };
       },
     );
@@ -96,23 +104,43 @@ export default class CustomOskHeightExtension extends Extension {
       forceRelayout,
     );
 
+    // relayout when suggestion row settings change
+    this._suggestionsHeightEnabledChangedId = this._settings.connect(
+      "changed::custom-osk-suggestions-height-enabled",
+      forceRelayout,
+    );
+    this._suggestionsHeightChangedId = this._settings.connect(
+      "changed::osk-suggestions-height-pixels",
+      forceRelayout,
+    );
+
     forceRelayout();
   }
 
   disable() {
+    this._settings?.disconnect(this._modeChangedId);
     this._settings?.disconnect(this._landscapeMultiplierChangedId);
     this._settings?.disconnect(this._portraitMultiplierChangedId);
     this._settings?.disconnect(this._landscapePixelsChangedId);
     this._settings?.disconnect(this._portraitPixelsChangedId);
-    this._settings?.disconnect(this._modeChangedId);
+    this._settings?.disconnect(this._suggestionsHeightEnabledChangedId);
+    this._settings?.disconnect(this._suggestionsHeightChangedId);
 
+    this._modeChangedId = null;
     this._landscapeMultiplierChangedId = null;
     this._portraitMultiplierChangedId = null;
     this._landscapePixelsChangedId = null;
     this._portraitPixelsChangedId = null;
-    this._modeChangedId = null;
+    this._suggestionsHeightEnabledChangedId = null;
+    this._suggestionsHeightChangedId = null;
 
     this._injectionManager?.clear();
     this._injectionManager = null;
+
+    const keyboardActor = Main.keyboard?.keyboardActor;
+    if (keyboardActor) {
+      if (keyboardActor._suggestions) keyboardActor._suggestions.height = -1;
+      keyboardActor._relayout();
+    }
   }
 }

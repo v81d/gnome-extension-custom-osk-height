@@ -30,11 +30,11 @@ export default class CustomOskHeightPreferences extends ExtensionPreferences {
     const mainPage = new Adw.PreferencesPage();
     window.add(mainPage);
 
-    const interpretationSettingsGroup = new Adw.PreferencesGroup({
+    const interpretationModeGroup = new Adw.PreferencesGroup({
       title: _("Interpretation Mode"),
       description: _("Configure how the height value is interpreted."),
     });
-    mainPage.add(interpretationSettingsGroup);
+    mainPage.add(interpretationModeGroup);
 
     const multiplierSettingsGroup = new Adw.PreferencesGroup({
       title: _("Multiplier Settings"),
@@ -47,6 +47,12 @@ export default class CustomOskHeightPreferences extends ExtensionPreferences {
       description: _("Adjust the OSK pixel height values."),
     });
     mainPage.add(pixelHeightSettingsGroup);
+
+    const suggestionsHeightOptionsGroup = new Adw.PreferencesGroup({
+      title: _("Suggestions Height Options"),
+      description: _("Control the OSK suggestions height."),
+    });
+    mainPage.add(suggestionsHeightOptionsGroup);
 
     /** The landscape OSK height multiplier adjustment. */
     const landscapeMultiplierAdjustment = new Gtk.Adjustment({
@@ -84,6 +90,15 @@ export default class CustomOskHeightPreferences extends ExtensionPreferences {
       value: 480,
     });
 
+    /** The OSK suggestion row height adjustment. */
+    const suggestionsHeightAdjustment = new Gtk.Adjustment({
+      lower: 32,
+      upper: 128,
+      step_increment: 1,
+      page_increment: 4,
+      value: 60,
+    });
+
     /**
      * The OSK height interpretation mode row.
      *
@@ -95,7 +110,7 @@ export default class CustomOskHeightPreferences extends ExtensionPreferences {
       subtitle: _("How the OSK height modifier is interpreted."),
       model: Gtk.StringList.new([_("Multiplier"), _("Pixels")]),
     });
-    interpretationSettingsGroup.add(modifierModeRow);
+    interpretationModeGroup.add(modifierModeRow);
 
     modifierModeRow.selected =
       settings.get_string("osk-height-modifier-mode") === "multiplier" ? 0 : 1;
@@ -134,6 +149,21 @@ export default class CustomOskHeightPreferences extends ExtensionPreferences {
     });
     pixelHeightSettingsGroup.add(portraitPixelsRow);
 
+    /** The row to enable or disable customizing the OSK suggestion row height. */
+    const suggestionsHeightEnabledRow = new Adw.SwitchRow({
+      title: _("Enable Custom OSK Suggestions Height"),
+      subtitle: _("Allow customizing the OSK suggestion row height."),
+    });
+    suggestionsHeightOptionsGroup.add(suggestionsHeightEnabledRow);
+
+    /** The OSK suggestion row height value. */
+    const suggestionsHeightPixelsRow = new Adw.SpinRow({
+      title: _("OSK Suggestions Pixel Height"),
+      subtitle: _("The pixel height of the OSK suggestion row."),
+      adjustment: suggestionsHeightAdjustment,
+    });
+    suggestionsHeightOptionsGroup.add(suggestionsHeightPixelsRow);
+
     // callback when a new modifier mode is selected
     modifierModeRow.connect("notify::selected", () => {
       settings.set_string(
@@ -144,21 +174,21 @@ export default class CustomOskHeightPreferences extends ExtensionPreferences {
       updateModifierSensitivity();
     });
 
+    suggestionsHeightEnabledRow.connect(
+      "notify::active",
+      updateSuggestionsPixelHeightSensitivity,
+    );
+
     // on UI initialization
     updateModifierSensitivity();
+    updateSuggestionsPixelHeightSensitivity();
 
     // add reset button to each row
     addResetButton(landscapeMultiplierRow, "landscape-osk-height-multiplier");
     addResetButton(portraitMultiplierRow, "portrait-osk-height-multiplier");
     addResetButton(landscapePixelsRow, "landscape-osk-height-pixels");
     addResetButton(portraitPixelsRow, "portrait-osk-height-pixels");
-    addResetButton(modifierModeRow, "osk-height-modifier-mode", () => {
-      modifierModeRow.selected =
-        settings.get_string("osk-height-modifier-mode") === "multiplier"
-          ? 0
-          : 1;
-      updateModifierSensitivity();
-    });
+    addResetButton(suggestionsHeightPixelsRow, "osk-suggestions-height-pixels");
 
     // bind all multiplier rows to their respective gsettings keys
     settings.bind(
@@ -188,6 +218,20 @@ export default class CustomOskHeightPreferences extends ExtensionPreferences {
       Gio.SettingsBindFlags.DEFAULT,
     );
 
+    // bind custom suggestion height rows to their gsettings keys
+    settings.bind(
+      "custom-osk-suggestions-height-enabled",
+      suggestionsHeightEnabledRow,
+      "active",
+      Gio.SettingsBindFlags.DEFAULT,
+    );
+    settings.bind(
+      "osk-suggestions-height-pixels",
+      suggestionsHeightPixelsRow,
+      "value",
+      Gio.SettingsBindFlags.DEFAULT,
+    );
+
     /** Disable the multiplier group when pixel mode is enabled and vice versa. */
     function updateModifierSensitivity() {
       const isMultiplier = modifierModeRow.selected === 0;
@@ -195,6 +239,13 @@ export default class CustomOskHeightPreferences extends ExtensionPreferences {
       // disable the previous settings rows
       multiplierSettingsGroup.set_sensitive(isMultiplier);
       pixelHeightSettingsGroup.set_sensitive(!isMultiplier);
+    }
+
+    /** Disable the suggestions pixel height value row when its setting is toggled off. */
+    function updateSuggestionsPixelHeightSensitivity() {
+      suggestionsHeightPixelsRow.set_sensitive(
+        suggestionsHeightEnabledRow.active,
+      );
     }
 
     /** Add a reset to default button at the end of a row. */
